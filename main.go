@@ -11,5 +11,5 @@ func lameFn(loops int) {
 }
 
 func main() {
-	lameFn(10)
+	go lameFn(10)
 }
