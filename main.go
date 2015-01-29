@@ -2,19 +2,39 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
-func connect(out chan string, in chan string) {
-	for str := range in {
-		out <- str
+const (
+	NUM_WORKERS = 1
+	NUM_JOBS    = 5
+)
+
+func workerFn(input string) string {
+	time.Sleep(time.Second) // Simulate doing some work
+	return fmt.Sprint(input, " - FINISHED")
+}
+
+func worker(jobs chan string) {
+	for job := range jobs {
+		output := workerFn(job)
+		fmt.Println(output)
 	}
 }
 
 func main() {
-	in := make(chan string)
-	out := make(chan string)
-	go connect(out, in)
+	jobs := make(chan string, 1000)
 
-	in <- "Hello World"
-	fmt.Println(<-out)
+	// Start your workers!
+	for i := 0; i < NUM_WORKERS; i++ {
+		go worker(jobs)
+	}
+
+	// Submit jobs
+	for i := 0; i < NUM_JOBS; i++ {
+		jobs <- fmt.Sprintf("Job #: %d", i)
+	}
+
+	// Wait for everything to finish
+	time.Sleep(time.Second * ((NUM_JOBS / NUM_WORKERS) + 1))
 }
