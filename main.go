@@ -11,5 +11,5 @@ func lameFn(loops int) {
 }
 
 func main() {
-	go lameFn(10)
+	go lameFn(10) // <-- We just went full async
 }
