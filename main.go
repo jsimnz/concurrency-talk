@@ -2,18 +2,33 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
+	"net/http"
+	//"time"
 )
 
 const (
-	NUM_WORKERS = 10
-	NUM_JOBS    = 100
+	NUM_WORKERS = 2
 )
 
-func workerFn(input string) string {
-	time.Sleep(time.Millisecond * time.Duration(500+rand.Int31n(500))) // Simulate doing some work for some amount of time between 0.5 - 1 second
-	return fmt.Sprint(input, " - FINISHED")
+var (
+	urls = []string{"http://google.com",
+		"http://twitter.com",
+		"http://facebook.com",
+		"http://conferencecloud.co",
+		"http://google.com",
+		"http://duckduckgo.com",
+		"http://golang.com",
+	}
+
+	NUM_JOBS = len(urls)
+)
+
+func workerFn(url string) string {
+	_, err := http.Get(url)
+	if err != nil {
+		return fmt.Sprintf("Failed to get %v", url)
+	}
+	return fmt.Sprintf("Sucessfully got %v", url)
 }
 
 func worker(jobs chan string, results chan string) {
@@ -31,7 +46,7 @@ func handleResults(results chan string) {
 
 func main() {
 	jobs := make(chan string, NUM_JOBS)
-	results := make(chan string, NUM_JOBS)
+	results := make(chan string)
 
 	// Start your workers!
 	for i := 0; i < NUM_WORKERS; i++ {
@@ -41,9 +56,9 @@ func main() {
 
 	// Submit jobs
 	for i := 0; i < NUM_JOBS; i++ {
-		jobs <- fmt.Sprintf("Job #: %d", i)
+		jobs <- urls[i]
 	}
 
-	// Wait for everything to finish
-	time.Sleep(time.Second * ((NUM_JOBS / NUM_WORKERS) + 1))
+	// Block indefinately
+	<-make(chan bool)
 }
