@@ -15,20 +15,28 @@ func workerFn(input string) string {
 	return fmt.Sprint(input, " - FINISHED")
 }
 
-func worker(jobs chan string) {
+func worker(jobs chan string, results chan string) {
 	for job := range jobs {
 		output := workerFn(job)
-		fmt.Println(output)
+		results <- output
+	}
+}
+
+func handleResults(results chan string) {
+	for result := range results {
+		fmt.Println(result)
 	}
 }
 
 func main() {
 	jobs := make(chan string, NUM_JOBS)
+	results := make(chan string, NUM_JOBS)
 
 	// Start your workers!
 	for i := 0; i < NUM_WORKERS; i++ {
-		go worker(jobs)
+		go worker(jobs, results)
 	}
+	go handleResults(results)
 
 	// Submit jobs
 	for i := 0; i < NUM_JOBS; i++ {
