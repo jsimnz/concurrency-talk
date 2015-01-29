@@ -23,7 +23,7 @@ func worker(jobs chan string) {
 }
 
 func main() {
-	jobs := make(chan string, 1000)
+	jobs := make(chan string, NUM_JOBS)
 
 	// Start your workers!
 	for i := 0; i < NUM_WORKERS; i++ {
