@@ -3,15 +3,17 @@ package main
 import (
 	"fmt"
 	"net/http"
-	//"time"
+	"time"
 )
 
 const (
-	NUM_WORKERS = 2
+	NUM_WORKERS     = 2
+	TIMEOUT_SECONDS = 5
 )
 
 var (
-	urls = []string{"http://google.com",
+	urls = []string{
+		"http://google.com",
 		"http://twitter.com",
 		"http://facebook.com",
 		"http://conferencecloud.co",
@@ -24,11 +26,23 @@ var (
 )
 
 func workerFn(url string) string {
-	_, err := http.Get(url)
-	if err != nil {
-		return fmt.Sprintf("Failed to get %v", url)
+	timeout := time.NewTimer(time.Second * TIMEOUT_SECONDS)
+	result := make(chan string)
+	go func(result chan string) {
+		_, err := http.Get(url)
+		if err != nil {
+			result <- fmt.Sprintf("Failed to get %v", url)
+		}
+		result <- fmt.Sprintf("Sucessfully got %v", url)
+	}(result)
+
+	select {
+	case val := <-result:
+		return val
+	case <-timeout.C:
+		return fmt.Sprintf("Timed out trying to get %v", url)
 	}
-	return fmt.Sprintf("Sucessfully got %v", url)
+
 }
 
 func worker(jobs chan string, results chan string) {
