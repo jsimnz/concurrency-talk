@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 )
 
 const (
-	NUM_WORKERS = 1
-	NUM_JOBS    = 5
+	NUM_WORKERS = 10
+	NUM_JOBS    = 100
 )
 
 func workerFn(input string) string {
-	time.Sleep(time.Second) // Simulate doing some work
+	time.Sleep(time.Millisecond * time.Duration(500+rand.Int31n(500))) // Simulate doing some work for some amount of time between 0.5 - 1 second
 	return fmt.Sprint(input, " - FINISHED")
 }
 
