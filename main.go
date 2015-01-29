@@ -11,7 +11,7 @@ const (
 )
 
 func workerFn(input string) string {
-	time.Sleep(time.Second) // Simulate doing some work
+	time.Sleep(time.Millisecond * time.Duration(500+rand.Int31n(500))) // Simulate doing some work for some amount of time between 0.5 - 1 second
 	return fmt.Sprint(input, " - FINISHED")
 }
 
